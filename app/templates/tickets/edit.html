@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Ticket - SupportDesk{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-8">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h2>Edit Ticket #{{ ticket.id }}</h2>
+                <p class="text-muted mb-0">
+                    Update ticket information
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for(
+                    'tickets.ticket_detail',
+                    ticket_id=ticket.id
+                ) }}"
+                class="btn btn-outline-secondary"
+            >
+                Back
+            </a>
+
+        </div>
+
+
+        <div class="card shadow-sm">
+
+            <div class="card-body p-4">
+
+                <form method="POST">
+
+                    <div class="mb-3">
+
+                        <label for="subject" class="form-label">
+                            Subject
+                        </label>
+
+                        <input
+                            type="text"
+                            id="subject"
+                            name="subject"
+                            class="form-control"
+                            value="{{ ticket.subject }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label for="description" class="form-label">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            class="form-control"
+                            rows="5"
+                            required
+                        >{{ ticket.description }}</textarea>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="requester_name"
+                                class="form-label"
+                            >
+                                Requester Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="requester_name"
+                                name="requester_name"
+                                class="form-control"
+                                value="{{ ticket.requester_name }}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="requester_email"
+                                class="form-label"
+                            >
+                                Requester Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="requester_email"
+                                name="requester_email"
+                                class="form-control"
+                                value="{{ ticket.requester_email }}"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label for="priority" class="form-label">
+                                Priority
+                            </label>
+
+                            <select
+                                id="priority"
+                                name="priority"
+                                class="form-select"
+                                required
+                            >
+
+                                <option
+                                    value="low"
+                                    {% if ticket.priority == "low" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Low
+                                </option>
+
+                                <option
+                                    value="medium"
+                                    {% if ticket.priority == "medium" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Medium
+                                </option>
+
+                                <option
+                                    value="high"
+                                    {% if ticket.priority == "high" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    High
+                                </option>
+
+                                <option
+                                    value="urgent"
+                                    {% if ticket.priority == "urgent" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Urgent
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label for="category" class="form-label">
+                                Category
+                            </label>
+
+                            <select
+                                id="category"
+                                name="category"
+                                class="form-select"
+                                required
+                            >
+
+                                {% for category in [
+                                    "bug",
+                                    "billing",
+                                    "how-to",
+                                    "technical",
+                                    "other"
+                                ] %}
+
+                                    <option
+                                        value="{{ category }}"
+                                        {% if ticket.category == category %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ category|capitalize }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-end gap-2">
+
+                        <a
+                            href="{{ url_for(
+                                'tickets.ticket_detail',
+                                ticket_id=ticket.id
+                            ) }}"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

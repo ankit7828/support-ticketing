@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}SLA Alerts - SupportDesk{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>SLA Alerts</h2>
+            <p class="text-muted mb-0">Tickets approaching or exceeding their response target.</p>
+        </div>
+    </div>
+
+    {% if alerts %}
+    <div class="card shadow-sm border-0">
+        <div class="card-header">
+            <strong>Active Alerts</strong>
+            <span class="badge bg-danger ms-2">{{ alerts|length }}</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Subject</th>
+                            <th>Alert</th>
+                            <th>Assignee</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('tickets.ticket_detail', ticket_id=alert.ticket_id) }}">#{{ alert.ticket_id }}</a>
+                            </td>
+                            <td>{{ alert.ticket.subject if alert.ticket else "-" }}</td>
+                            <td>
+                                {% if alert.alert_type == "breach" %}
+                                <span class="badge bg-danger">SLA Breached</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Near SLA Breach</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if alert.ticket and alert.ticket.primary_assignee %}
+                                {{ alert.ticket.primary_assignee.name }}
+                                {% else %}
+                                <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ alert.created_at.strftime("%d %b %Y %H:%M") if alert.created_at else "-" }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('alerts.acknowledge', alert_id=alert.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Acknowledge</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+            <h5>No active SLA alerts</h5>
+            <p class="text-muted mb-0">All assigned tickets are currently within their SLA.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

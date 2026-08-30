@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SupportDesk{% endblock %}
+{% block content %}
+<div class="container-fluid dashboard-page">
+
+    <!-- DASHBOARD HEADER -->
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="fw-bold mb-0">Dashboard</h2>
+                <span class="live-badge"><span class="live-dot"></span>Live</span>
+            </div>
+            <p class="text-muted mb-0">Support ticket overview and SLA performance</p>
+        </div>
+        <a href="{{ url_for('tickets.create_ticket') }}" class="btn btn-primary new-ticket-btn"><span class="plus-icon">+</span>New Ticket</a>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row g-3 mb-4">
+        <!-- OPEN -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-open">
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Open Tickets</div>
+                        <div class="stat-value">{{ open_tickets }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="stat-footer"><span class="status-indicator"></span>Currently active</div>
+            </div>
+        </div>
+
+        <!-- PENDING -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-pending">
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Pending on Customer</div>
+                        <div class="stat-value">{{ pending_tickets }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="stat-footer"><span class="status-indicator"></span>Waiting for response</div>
+            </div>
+        </div>
+
+        <!-- RESOLVED -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-resolved">
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">Resolved This Week</div>
+                        <div class="stat-value">{{ resolved_this_week }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8.5 12 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+                <div class="stat-footer"><span class="status-indicator"></span>Completed this week</div>
+            </div>
+        </div>
+
+        <!-- SLA -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-breach">
+                <div class="stat-card-top">
+                    <div>
+                        <div class="stat-label">SLA Breaches</div>
+                        <div class="stat-value">{{ breaching_tickets }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 21 20H3L12 4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="stat-footer">
+                    {% if breaching_tickets > 0 %}<span class="status-indicator danger"></span>Attention required
+                    {% else %}<span class="status-indicator success"></span>No active breaches{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATUS + AGENT BREAKDOWN -->
+    <div class="row g-4 mb-4">
+        <!-- STATUS BREAKDOWN -->
+        <div class="col-xl-6">
+            <div class="dashboard-card h-100">
+                <div class="card-heading">
+                    <div><h5>Tickets by Status</h5><p>Current distribution</p></div>
+                    <div class="heading-icon">
+                        <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="m7 15 4-5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+
+                {% set total_status = status_breakdown.new + status_breakdown.open + status_breakdown.pending + status_breakdown.resolved + status_breakdown.closed %}
+
+                <div class="status-list">
+                    {% for name in ["new", "open", "pending", "resolved", "closed"] %}
+                        {% set count = status_breakdown[name] %}
+                        {% if total_status > 0 %}{% set percent = (count / total_status * 100)|round(1) %}{% else %}{% set percent = 0 %}{% endif %}
+
+                        <div class="status-row">
+                            <div class="status-row-header">
+                                <div class="d-flex align-items-center gap-2"><span class="status-dot status-{{ name }}"></span><span class="status-name">{{ name|capitalize }}</span></div>
+                                <div class="status-number">{{ count }} <span>{{ percent }}%</span></div>
+                            </div>
+                            <div class="status-track"><div class="status-fill status-fill-{{ name }}" style="width: {{ percent }}%;"></div></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AGENT BREAKDOWN -->
+        <div class="col-xl-6">
+            <div class="dashboard-card h-100">
+                <div class="card-heading">
+                    <div><h5>Tickets by Agent</h5><p>Current workload</p></div>
+                    <div class="heading-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 19c0-3 2.5-5 6-5s6 2 6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 11c2.5.3 4 1.8 4 4M16 5.5a2.5 2.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+
+                {% if agent_breakdown %}
+                    <div class="agent-list">
+                        {% for agent in agent_breakdown %}
+                            <div class="agent-row">
+                                <div class="agent-info">
+                                    <div class="agent-avatar">{{ agent.name[0]|upper }}</div>
+                                    <div><div class="agent-name">{{ agent.name }}</div><div class="agent-role">Support Agent</div></div>
+                                </div>
+                                <div class="agent-count"><strong>{{ agent.count }}</strong><span>ticket{{ '' if agent.count == 1 else 's' }}</span></div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state"><div class="empty-icon">—</div><p>No agent data available.</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RESOLVED CHART -->
+    <div class="dashboard-card chart-card mb-4">
+        <div class="card-heading chart-heading">
+            <div><h5>Tickets Resolved</h5><p>Resolution trend over the last 8 weeks</p></div>
+            <div class="chart-summary"><span class="chart-summary-label">8 weeks</span><span class="chart-summary-icon">↗</span></div>
+        </div>
+        <div class="chart-wrapper"><canvas id="resolvedChart"></canvas></div>
+    </div>
+
+    <!-- WEEKLY DATA -->
+    <div id="weeklyData" hidden>
+        {% for week in weekly_resolved %}<span class="weekly-item" data-label="{{ week.label }}" data-count="{{ week.count }}"></span>{% endfor %}
+    </div>
+
+    <!-- RECENT TICKETS -->
+    <div class="dashboard-card mb-4">
+        <div class="card-heading recent-heading">
+            <div><h5>Recent Tickets</h5><p>Latest activity in your queue</p></div>
+            <a href="{{ url_for('tickets.list_tickets') }}" class="view-all-link">View All <span>→</span></a>
+        </div>
+
+        <div class="table-responsive">
+            {% if recent_tickets %}
+            <table class="table recent-table align-middle mb-0">
+                <thead><tr><th>ID</th><th>Subject</th><th>Status</th><th>Priority</th><th>Created</th></tr></thead>
+                <tbody>
+                    {% for ticket in recent_tickets %}
+                    <tr>
+                        <td><span class="ticket-id">#{{ ticket.id }}</span></td>
+                        <td><a href="{{ url_for('tickets.ticket_detail', ticket_id=ticket.id) }}" class="ticket-subject">{{ ticket.subject }}</a></td>
+                        <td>
+                            {% if ticket.status == "new" %}<span class="ticket-badge badge-new">New</span>
+                            {% elif ticket.status == "open" %}<span class="ticket-badge badge-open">Open</span>
+                            {% elif ticket.status == "pending" %}<span class="ticket-badge badge-pending">Pending</span>
+                            {% elif ticket.status == "resolved" %}<span class="ticket-badge badge-resolved">Resolved</span>
+                            {% elif ticket.status == "closed" %}<span class="ticket-badge badge-closed">Closed</span>
+                            {% else %}<span class="ticket-badge badge-default">{{ ticket.status|capitalize }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if ticket.priority == "urgent" %}<span class="ticket-badge badge-urgent">Urgent</span>
+                            {% elif ticket.priority == "high" %}<span class="ticket-badge badge-high">High</span>
+                            {% elif ticket.priority == "medium" %}<span class="ticket-badge badge-medium">Medium</span>
+                            {% else %}<span class="ticket-badge badge-low">Low</span>{% endif %}
+                        </td>
+                        <td>
+                            <span class="created-date">{{ ticket.created_at.strftime('%d %b %Y') if ticket.created_at else '-' }}</span>
+                            {% if ticket.created_at %}<span class="created-time">{{ ticket.created_at.strftime('%H:%M') }}</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-tickets">
+                <div class="empty-ticket-icon">✓</div>
+                <h5>No tickets yet</h5>
+                <p>Create your first support ticket to get started.</p>
+                <a href="{{ url_for('tickets.create_ticket') }}" class="btn btn-primary">Create Ticket</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-page{padding-bottom:45px}
+.dashboard-header h2{letter-spacing:-.5px;font-size:36px}
+.dashboard-header p{font-size:17px}
+.live-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:20px;background:#ecfdf3;color:#16803c;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#20a45a;box-shadow:0 0 0 3px rgba(32,164,90,.12)}
+.new-ticket-btn{border-radius:10px;padding:13px 22px;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(13,110,253,.15)}
+.plus-icon{font-size:21px;line-height:0;margin-right:6px}
+
+.stat-card{position:relative;overflow:hidden;height:100%;min-height:190px;padding:29px;border-radius:15px;background:#fff;border:1px solid #e9ecef;box-shadow:0 3px 12px rgba(0,0,0,.045);transition:transform .2s ease,box-shadow .2s ease}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 9px 25px rgba(0,0,0,.08)}
+.stat-card::after{content:"";position:absolute;width:105px;height:105px;border-radius:50%;right:-36px;bottom:-40px;opacity:.08}
+.stat-open::after{background:#0d6efd}
+.stat-pending::after{background:#f59e0b}
+.stat-resolved::after{background:#198754}
+.stat-breach::after{background:#dc3545}
+.stat-card-top{display:flex;align-items:flex-start;justify-content:space-between}
+.stat-label{color:#6c757d;font-size:16px;font-weight:600;margin-bottom:11px}
+.stat-value{font-size:43px;line-height:1;font-weight:750;color:#17202a}
+.stat-icon{width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:12px}
+.stat-icon svg{width:29px;height:29px}
+.stat-open .stat-icon{background:#eaf2ff;color:#0d6efd}
+.stat-pending .stat-icon{background:#fff5df;color:#e59b00}
+.stat-resolved .stat-icon{background:#eaf8f0;color:#198754}
+.stat-breach .stat-icon{background:#fff0f1;color:#dc3545}
+.stat-footer{position:absolute;left:29px;bottom:22px;color:#89929a;font-size:14px;display:flex;align-items:center;gap:8px}
+.status-indicator{width:9px;height:9px;border-radius:50%;background:#0d6efd}
+.status-indicator.success{background:#198754}
+.status-indicator.danger{background:#dc3545}
+
+.dashboard-card{background:#fff;border:1px solid #e9ecef;border-radius:15px;box-shadow:0 3px 12px rgba(0,0,0,.045);overflow:hidden}
+.card-heading{display:flex;justify-content:space-between;align-items:flex-start;padding:27px 28px 21px}
+.card-heading h5{margin:0;color:#202832;font-size:20px;font-weight:700}
+.card-heading p{margin:7px 0 0;color:#8a939b;font-size:14px}
+.heading-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#f5f7fa;color:#697580}
+.heading-icon svg{width:24px;height:24px}
+
+.status-list{padding:7px 28px 29px}
+.status-row{margin-bottom:23px}
+.status-row:last-child{margin-bottom:0}
+.status-row-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.status-name{font-size:16px;font-weight:600;color:#4f5962}
+.status-number{font-size:16px;font-weight:700;color:#252d34}
+.status-number span{color:#98a0a7;font-size:13px;font-weight:500;margin-left:7px}
+.status-dot{width:10px;height:10px;border-radius:50%}
+.status-new{background:#0dcaf0}
+.status-open{background:#0d6efd}
+.status-pending{background:#ffc107}
+.status-resolved{background:#198754}
+.status-closed{background:#343a40}
+.status-track{height:9px;width:100%;overflow:hidden;border-radius:10px;background:#f0f2f4}
+.status-fill{height:100%;min-width:2px;border-radius:10px;transition:width .5s ease}
+.status-fill-new{background:#0dcaf0}
+.status-fill-open{background:#0d6efd}
+.status-fill-pending{background:#ffc107}
+.status-fill-resolved{background:#198754}
+.status-fill-closed{background:#343a40}
+
+.agent-list{padding:0 28px 25px}
+.agent-row{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid #f0f2f4}
+.agent-row:last-child{border-bottom:0}
+.agent-info{display:flex;align-items:center;gap:14px}
+.agent-avatar{width:43px;height:43px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#eaf2ff;color:#0d6efd;font-size:15px;font-weight:700}
+.agent-name{color:#313a43;font-size:16px;font-weight:650}
+.agent-role{color:#9aa2a9;font-size:13px;margin-top:4px}
+.agent-count{text-align:right}
+.agent-count strong{display:block;color:#252d34;font-size:20px}
+.agent-count span{color:#9aa2a9;font-size:12px}
+.empty-state{padding:32px;text-align:center;color:#89929a}
+.empty-icon{font-size:34px;margin-bottom:7px}
+
+.chart-card{padding-bottom:15px}
+.chart-heading{padding-bottom:16px}
+.chart-summary{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;background:#f7f9fb}
+.chart-summary-label{color:#697580;font-size:13px;font-weight:600}
+.chart-summary-icon{color:#198754;font-weight:700;font-size:15px}
+
+/* Larger chart */
+.chart-wrapper{position:relative;height:500px;padding:15px 30px 30px}
+
+.recent-heading{padding-bottom:16px}
+.view-all-link{display:inline-flex;align-items:center;gap:8px;color:#0d6efd;font-size:14px;font-weight:650;text-decoration:none;padding-top:4px}
+.view-all-link:hover{text-decoration:underline}
+.recent-table{border-top:1px solid #f0f2f4}
+.recent-table thead th{background:#fafbfc;color:#7b858d;border-bottom:1px solid #e9ecef;padding:17px 22px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.recent-table tbody td{padding:19px 22px;border-bottom:1px solid #f0f2f4}
+.recent-table tbody tr:last-child td{border-bottom:0}
+.recent-table tbody tr{transition:background .15s ease}
+.recent-table tbody tr:hover{background:#fafcff}
+.ticket-id{color:#89929a;font-size:14px;font-weight:650}
+.ticket-subject{color:#1266d5;font-size:15px;font-weight:650;text-decoration:none}
+.ticket-subject:hover{text-decoration:underline}
+.ticket-badge{display:inline-flex;align-items:center;padding:6px 11px;border-radius:7px;font-size:12px;font-weight:700}
+.badge-new{background:#dff8fd;color:#087990}
+.badge-open{background:#e6f0ff;color:#0758c7}
+.badge-pending{background:#fff3cd;color:#946c00}
+.badge-resolved{background:#dff5e8;color:#146c43}
+.badge-closed{background:#e9ecef;color:#343a40}
+.badge-default{background:#f1f3f5;color:#687078}
+.badge-urgent{background:#fde7e9;color:#b02a37}
+.badge-high{background:#fff3cd;color:#946c00}
+.badge-medium{background:#e6f0ff;color:#0758c7}
+.badge-low{background:#e9ecef;color:#5c636a}
+.created-date{display:block;color:#4f5962;font-size:14px;font-weight:600}
+.created-time{display:block;color:#9aa2a9;font-size:12px;margin-top:3px}
+.empty-tickets{padding:70px 20px;text-align:center}
+.empty-ticket-icon{width:58px;height:58px;margin:0 auto 17px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#eaf8f0;color:#198754;font-size:24px;font-weight:700}
+.empty-tickets h5{font-size:19px;font-weight:700}
+.empty-tickets p{color:#89929a;font-size:15px;margin-bottom:20px}
+
+@media (max-width:768px){
+    .dashboard-header{align-items:flex-start!important;gap:15px}
+    .dashboard-header h2{font-size:28px}
+    .new-ticket-btn{white-space:nowrap;padding:10px 14px}
+    .stat-card{min-height:165px}
+    .stat-value{font-size:36px}
+    .chart-wrapper{height:350px;padding-left:10px;padding-right:10px}
+    .recent-table{min-width:650px}
+}
+</style>
+
+<!-- CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+    /*
+     * READ WEEKLY DATA
+     *
+     * Jinja is intentionally kept outside JavaScript.
+     */
+    const weeklyItems=document.querySelectorAll(".weekly-item");
+    const weeklyLabels=[];
+    const weeklyCounts=[];
+
+    weeklyItems.forEach(function(item){
+        weeklyLabels.push(item.dataset.label);
+        weeklyCounts.push(Number(item.dataset.count));
+    });
+
+    /*
+     * RESOLVED TICKETS CHART
+     */
+    const chartElement=document.getElementById("resolvedChart");
+
+    if(chartElement&&typeof Chart!=="undefined"){
+        const ctx=chartElement.getContext("2d");
+
+        /*
+         * Gradient below the line
+         */
+        const gradient=ctx.createLinearGradient(0,0,0,300);
+        gradient.addColorStop(0,"rgba(13, 110, 253, 0.22)");
+        gradient.addColorStop(1,"rgba(13, 110, 253, 0.01)");
+
+        new Chart(chartElement,{
+            type:"line",
+            data:{
+                labels:weeklyLabels,
+                datasets:[{
+                    label:"Resolved Tickets",
+                    data:weeklyCounts,
+                    borderColor:"#0d6efd",
+                    backgroundColor:gradient,
+                    borderWidth:3,
+                    pointBackgroundColor:"#ffffff",
+                    pointBorderColor:"#0d6efd",
+                    pointBorderWidth:3,
+                    pointRadius:4,
+                    pointHoverRadius:7,
+                    fill:true,
+                    tension:0.38,
+                    cubicInterpolationMode:"monotone"
+                }]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                interaction:{intersect:false,mode:"index"},
+                plugins:{
+                    legend:{display:false},
+                    tooltip:{
+                        backgroundColor:"rgba(25, 32, 40, 0.94)",
+                        titleColor:"#ffffff",
+                        bodyColor:"#ffffff",
+                        padding:12,
+                        cornerRadius:8,
+                        displayColors:false,
+                        callbacks:{
+                            label:function(context){
+                                const value=context.parsed.y;
+                                return value+" resolved ticket"+(value===1?"":"s");
+                            }
+                        }
+                    }
+                },
+                scales:{
+                    x:{
+                        grid:{display:false},
+                        border:{display:false},
+                        ticks:{color:"#8b949c",font:{size:11},padding:8}
+                    },
+                    y:{
+                        beginAtZero:true,
+                        suggestedMax:Math.max(...(weeklyCounts.length?weeklyCounts:[5]))+2,
+                        grid:{color:"rgba(0,0,0,0.055)",drawTicks:false},
+                        border:{display:false},
+                        ticks:{color:"#8b949c",font:{size:11},padding:10,precision:0}
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Create Ticket - SupportDesk{% endblock %}
+
+{% block content %}
+<div class="create-ticket-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">
+                <span class="title-icon">+</span>
+                <h2>Create Ticket</h2>
+            </div>
+            <p>Create a new support ticket and assign it to an agent.</p>
+        </div>
+        <a href="{{ url_for('tickets.list_tickets') }}" class="back-btn">← Back</a>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="ticket-card">
+        <div class="card-top">
+            <div>
+                <h4>Ticket Information</h4>
+                <p>Enter the details of the customer's issue.</p>
+            </div>
+            <span class="required-note">* Required</span>
+        </div>
+
+        <form method="POST">
+
+            <!-- BASIC INFORMATION -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>01</span>
+                    <div>
+                        <h5>Basic Information</h5>
+                        <p>Describe the customer's request.</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="subject" class="form-label">Subject <span>*</span></label>
+                    <input type="text" id="subject" name="subject" class="form-control"
+                           placeholder="Enter ticket subject" required>
+                </div>
+
+                <div>
+                    <label for="description" class="form-label">Description <span>*</span></label>
+                    <textarea id="description" name="description" class="form-control description-box"
+                              rows="6" placeholder="Describe the customer's issue" required></textarea>
+                    <div class="field-hint">Provide enough information to help the support agent understand the issue.</div>
+                </div>
+            </div>
+
+            <!-- REQUESTER INFORMATION -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>02</span>
+                    <div>
+                        <h5>Requester Information</h5>
+                        <p>Contact details of the customer.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="requester_name" class="form-label">Requester Name <span>*</span></label>
+                        <input type="text" id="requester_name" name="requester_name" class="form-control"
+                               placeholder="Customer name" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="requester_email" class="form-label">Requester Email <span>*</span></label>
+                        <input type="email" id="requester_email" name="requester_email" class="form-control"
+                               placeholder="customer@example.com" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TICKET CLASSIFICATION -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>03</span>
+                    <div>
+                        <h5>Ticket Classification</h5>
+                        <p>Set the priority and category.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="priority" class="form-label">Priority <span>*</span></label>
+                        <select id="priority" name="priority" class="form-select" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="category" class="form-label">Category <span>*</span></label>
+                        <select id="category" name="category" class="form-select" required>
+                            <option value="">Select category</option>
+                            <option value="bug">Bug</option>
+                            <option value="billing">Billing</option>
+                            <option value="how-to">How-to</option>
+                            <option value="technical">Technical</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASSIGNMENT -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span>04</span>
+                    <div>
+                        <h5>Assignment</h5>
+                        <p>Choose the primary support agent.</p>
+                    </div>
+                </div>
+
+                <label for="primary_assignee_id" class="form-label">Primary Assignee</label>
+                <select id="primary_assignee_id" name="primary_assignee_id" class="form-select">
+                    <option value="">Unassigned</option>
+                    {% for user in agents %}
+                    <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="form-actions">
+                <a href="{{ url_for('tickets.list_tickets') }}" class="cancel-btn">Cancel</a>
+                <button type="submit" class="create-btn">Create Ticket <span>→</span></button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+.create-ticket-page{max-width:1350px;margin:0 auto;padding:15px 10px 55px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.page-title{display:flex;align-items:center;gap:14px}
+.page-title h2{margin:0;font-size:38px;font-weight:700;color:#17202a;letter-spacing:-.6px}
+.title-icon{width:50px;height:50px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#eaf2ff;color:#0d6efd;font-size:31px;font-weight:500}
+.page-header p{margin:9px 0 0;color:#68737d;font-size:17px}
+.back-btn{padding:12px 20px;border:1px solid #adb5bd;border-radius:9px;color:#495057;text-decoration:none;font-size:16px;font-weight:600;background:#fff}
+.back-btn:hover{background:#f8f9fa;color:#212529}
+
+.ticket-card{background:#fff;border:1px solid #dfe4e8;border-radius:17px;box-shadow:0 6px 25px rgba(0,0,0,.06);overflow:hidden}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;padding:30px 36px 27px;border-bottom:1px solid #e9edf0;background:#fbfcfd}
+.card-top h4{margin:0;font-size:22px;font-weight:700;color:#202832}
+.card-top p{margin:7px 0 0;color:#7d878f;font-size:15px}
+.required-note{color:#8a949c;font-size:14px}
+
+form{padding:0 36px}
+.form-section{padding:34px 0;border-bottom:1px solid #e9edf0}
+.form-section:last-of-type{border-bottom:0}
+.section-title{display:flex;align-items:flex-start;gap:16px;margin-bottom:28px}
+.section-title>span{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#eaf2ff;color:#0d6efd;font-size:14px;font-weight:700}
+.section-title h5{margin:0;color:#202832;font-size:19px;font-weight:700}
+.section-title p{margin:5px 0 0;color:#89939b;font-size:14px}
+
+.form-label{display:block;margin-bottom:10px;color:#39434d;font-size:16px;font-weight:600}
+.form-label span{color:#dc3545}
+.form-control,.form-select{min-height:52px;padding:12px 16px;border:1px solid #d3d9df;border-radius:9px;color:#34404a;font-size:16px;box-shadow:none}
+.form-control::placeholder{color:#9ca5ad;font-size:15px}
+.form-control:focus,.form-select:focus{border-color:#86b7fe;box-shadow:0 0 0 4px rgba(13,110,253,.10)}
+.description-box{min-height:165px;resize:vertical;line-height:1.55}
+.field-hint{margin-top:9px;color:#929ba3;font-size:13px}
+
+.form-actions{display:flex;justify-content:flex-end;gap:12px;padding:28px 0 34px}
+.cancel-btn,.create-btn{padding:13px 23px;border-radius:9px;font-size:16px;font-weight:600;text-decoration:none}
+.cancel-btn{border:1px solid #adb5bd;background:#fff;color:#59636c}
+.cancel-btn:hover{background:#f5f6f7}
+.create-btn{border:0;background:#0d6efd;color:#fff;box-shadow:0 5px 14px rgba(13,110,253,.2)}
+.create-btn:hover{background:#0b5ed7}
+.create-btn span{margin-left:8px;font-size:20px}
+
+@media(max-width:768px){
+    .create-ticket-page{padding:5px 0 35px}
+    .page-header{align-items:flex-start;gap:15px}
+    .page-title h2{font-size:30px}
+    .page-header p{font-size:14px}
+    .title-icon{width:44px;height:44px;font-size:27px}
+    .back-btn{padding:10px 15px;font-size:14px}
+    .card-top{padding:24px}
+    form{padding:0 24px}
+    .form-section{padding:28px 0}
+    .section-title h5{font-size:17px}
+    .form-label{font-size:15px}
+    .form-control,.form-select{font-size:15px}
+    .form-actions{padding-bottom:27px}
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1129 @@
+{% extends "base.html" %}
+
+{% block title %}Tickets - SupportDesk{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">Tickets</h2>
+
+            <p class="text-muted mb-0">
+                {{ total_matches }}
+                ticket{{ '' if total_matches == 1 else 's' }}
+                found
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <!-- EXPORT CURRENT FILTER -->
+            <a
+                href="{{ url_for(
+                    'tickets.export_tickets',
+                    search=search,
+                    status=status,
+                    priority=priority,
+                    category=category,
+                    assignee=assignee,
+                    sort=sort
+                ) }}"
+                class="btn btn-outline-success"
+            >
+                Export CSV
+            </a>
+
+            <!-- CREATE TICKET -->
+            <a
+                href="{{ url_for('tickets.create_ticket') }}"
+                class="btn btn-primary"
+            >
+                + New Ticket
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         SEARCH AND FILTERS
+    ========================================================== -->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header">
+            <strong>Search & Filters</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form
+                method="GET"
+                action="{{ url_for('tickets.list_tickets') }}"
+            >
+
+                <div class="row g-3">
+
+                    <!-- SEARCH -->
+
+                    <div class="col-lg-4 col-md-6">
+
+                        <label
+                            for="search"
+                            class="form-label"
+                        >
+                            Search
+                        </label>
+
+                        <input
+                            type="search"
+                            id="search"
+                            name="search"
+                            class="form-control"
+                            placeholder="Search subject or description..."
+                            value="{{ search }}"
+                        >
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="status"
+                            class="form-label"
+                        >
+                            Status
+                        </label>
+
+                        <select
+                            id="status"
+                            name="status"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Statuses
+                            </option>
+
+                            <option
+                                value="new"
+                                {% if status == "new" %}selected{% endif %}
+                            >
+                                New
+                            </option>
+
+                            <option
+                                value="open"
+                                {% if status == "open" %}selected{% endif %}
+                            >
+                                Open
+                            </option>
+
+                            <option
+                                value="pending"
+                                {% if status == "pending" %}selected{% endif %}
+                            >
+                                Pending
+                            </option>
+
+                            <option
+                                value="resolved"
+                                {% if status == "resolved" %}selected{% endif %}
+                            >
+                                Resolved
+                            </option>
+
+                            <option
+                                value="closed"
+                                {% if status == "closed" %}selected{% endif %}
+                            >
+                                Closed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- PRIORITY -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="priority"
+                            class="form-label"
+                        >
+                            Priority
+                        </label>
+
+                        <select
+                            id="priority"
+                            name="priority"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Priorities
+                            </option>
+
+                            <option
+                                value="urgent"
+                                {% if priority == "urgent" %}selected{% endif %}
+                            >
+                                Urgent
+                            </option>
+
+                            <option
+                                value="high"
+                                {% if priority == "high" %}selected{% endif %}
+                            >
+                                High
+                            </option>
+
+                            <option
+                                value="medium"
+                                {% if priority == "medium" %}selected{% endif %}
+                            >
+                                Medium
+                            </option>
+
+                            <option
+                                value="low"
+                                {% if priority == "low" %}selected{% endif %}
+                            >
+                                Low
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="category"
+                            class="form-label"
+                        >
+                            Category
+                        </label>
+
+                        <select
+                            id="category"
+                            name="category"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for item in categories %}
+
+                                <option
+                                    value="{{ item }}"
+                                    {% if category == item %}selected{% endif %}
+                                >
+                                    {{ item|capitalize }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ASSIGNEE FILTER -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label
+                            for="assignee"
+                            class="form-label"
+                        >
+                            Assignee
+                        </label>
+
+                        <select
+                            id="assignee"
+                            name="assignee"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Agents
+                            </option>
+
+                            {% for agent in agents %}
+
+                                <option
+                                    value="{{ agent.id }}"
+                                    {% if assignee|string == agent.id|string %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ agent.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SORT -->
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label
+                            for="sort"
+                            class="form-label"
+                        >
+                            Sort By
+                        </label>
+
+                        <select
+                            id="sort"
+                            name="sort"
+                            class="form-select"
+                        >
+
+                            <option
+                                value="created"
+                                {% if sort == "created" %}selected{% endif %}
+                            >
+                                Newest First
+                            </option>
+
+                            <option
+                                value="updated"
+                                {% if sort == "updated" %}selected{% endif %}
+                            >
+                                Recently Updated
+                            </option>
+
+                            <option
+                                value="priority"
+                                {% if sort == "priority" %}selected{% endif %}
+                            >
+                                Highest Priority
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- BUTTONS -->
+
+                    <div
+                        class="col-lg-3 col-md-6 d-flex align-items-end gap-2"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Search
+                        </button>
+
+                        <a
+                            href="{{ url_for('tickets.list_tickets') }}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Clear
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         BULK ACTION FORM
+    ========================================================== -->
+
+    <form
+        method="POST"
+        action="{{ url_for('tickets.bulk_action') }}"
+        id="bulkActionForm"
+    >
+
+        {% if tickets %}
+
+        <div class="card shadow-sm border-0">
+
+            <!-- =================================================
+                 QUEUE HEADER
+            ================================================== -->
+
+            <div class="card-header">
+
+                <div
+                    class="d-flex justify-content-between
+                           align-items-center"
+                >
+
+                    <div>
+
+                        <strong>
+                            Ticket Queue
+                        </strong>
+
+                        <span
+                            id="selectedCount"
+                            class="text-muted ms-2"
+                        >
+                            0 selected
+                        </span>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         BULK ACTIONS
+                    ================================================== -->
+
+                    {% if current_user.role == "supervisor" %}
+
+                    <div class="d-flex gap-2">
+
+                        <select
+                            name="agent_id"
+                            id="bulkAgent"
+                            class="form-select form-select-sm"
+                            style="width: 180px;"
+                            aria-label="Select agent for bulk reassignment"
+                        >
+
+                            <option value="">
+                                Reassign To...
+                            </option>
+
+                            {% for agent in agents %}
+
+                                <option
+                                    value="{{ agent.id }}"
+                                >
+                                    {{ agent.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <button
+                            type="submit"
+                            name="action"
+                            value="reassign"
+                            class="btn btn-sm btn-outline-primary"
+                            onclick="return confirmBulkReassign();"
+                        >
+                            Bulk Reassign
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            name="action"
+                            value="close"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="return confirmBulkClose();"
+                        >
+                            Bulk Close
+                        </button>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table
+                        class="table table-hover align-middle mb-0"
+                    >
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                {% if current_user.role == "supervisor" %}
+
+                                <th style="width: 45px;">
+
+                                    <input
+                                        type="checkbox"
+                                        id="selectAll"
+                                        class="form-check-input"
+                                        title="Select all tickets"
+                                        aria-label="Select all tickets"
+                                    >
+
+                                </th>
+
+                                {% endif %}
+
+                                <th>ID</th>
+                                <th>Subject</th>
+                                <th>Requester</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Category</th>
+                                <th>Assignee</th>
+                                <th>Created</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for ticket in tickets %}
+
+                            <tr>
+
+                                <!-- CHECKBOX -->
+
+                                {% if current_user.role == "supervisor" %}
+
+                                <td>
+
+                                    <input
+                                        type="checkbox"
+                                        name="ticket_ids"
+                                        value="{{ ticket.id }}"
+                                        class="form-check-input ticket-checkbox"
+                                        aria-label="Select ticket #{{ ticket.id }}"
+                                    >
+
+                                </td>
+
+                                {% endif %}
+
+
+                                <!-- ID -->
+
+                                <td>
+                                    #{{ ticket.id }}
+                                </td>
+
+
+                                <!-- SUBJECT -->
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for(
+                                            'tickets.ticket_detail',
+                                            ticket_id=ticket.id
+                                        ) }}"
+                                        class="fw-semibold
+                                               text-decoration-none"
+                                    >
+                                        {{ ticket.subject }}
+                                    </a>
+
+                                </td>
+
+
+                                <!-- REQUESTER -->
+
+                                <td>
+
+                                    <div>
+                                        {{ ticket.requester_name }}
+                                    </div>
+
+                                    <small class="text-muted">
+                                        {{ ticket.requester_email }}
+                                    </small>
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    {% if ticket.status == "new" %}
+
+                                        <span
+                                            class="badge bg-info text-dark"
+                                        >
+                                            New
+                                        </span>
+
+                                    {% elif ticket.status == "open" %}
+
+                                        <span class="badge bg-primary">
+                                            Open
+                                        </span>
+
+                                    {% elif ticket.status == "pending" %}
+
+                                        <span
+                                            class="badge bg-warning
+                                                   text-dark"
+                                        >
+                                            Pending
+                                        </span>
+
+                                    {% elif ticket.status == "resolved" %}
+
+                                        <span class="badge bg-success">
+                                            Resolved
+                                        </span>
+
+                                    {% elif ticket.status == "closed" %}
+
+                                        <span class="badge bg-dark">
+                                            Closed
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-secondary">
+                                            {{ ticket.status|capitalize }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- PRIORITY -->
+
+                                <td>
+
+                                    {% if ticket.priority == "urgent" %}
+
+                                        <span class="badge bg-danger">
+                                            Urgent
+                                        </span>
+
+                                    {% elif ticket.priority == "high" %}
+
+                                        <span
+                                            class="badge bg-warning
+                                                   text-dark"
+                                        >
+                                            High
+                                        </span>
+
+                                    {% elif ticket.priority == "medium" %}
+
+                                        <span class="badge bg-primary">
+                                            Medium
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-secondary">
+                                            Low
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- CATEGORY -->
+
+                                <td>
+                                    {{ ticket.category|capitalize }}
+                                </td>
+
+
+                                <!-- ASSIGNEE -->
+
+                                <td>
+
+                                    {% if ticket.primary_assignee %}
+
+                                        {{ ticket.primary_assignee.name }}
+
+                                    {% else %}
+
+                                        <span class="text-muted">
+                                            Unassigned
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- CREATED -->
+
+                                <td>
+
+                                    <small>
+
+                                        {{ ticket.created_at.strftime(
+                                            '%d %b %Y'
+                                        ) }}
+
+                                        <br>
+
+                                        <span class="text-muted">
+                                            {{ ticket.created_at.strftime(
+                                                '%H:%M'
+                                            ) }}
+                                        </span>
+
+                                    </small>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAGINATION
+            ================================================== -->
+
+            {% if pagination.pages > 1 %}
+
+            <div
+                class="d-flex justify-content-between
+                       align-items-center p-3"
+            >
+
+                <div class="text-muted">
+
+                    Showing
+                    {{ pagination.first }}
+                    -
+                    {{ pagination.last }}
+                    of
+                    {{ pagination.total }}
+
+                </div>
+
+
+                <nav aria-label="Ticket pagination">
+
+                    <ul class="pagination mb-0">
+
+                        <!-- PREVIOUS -->
+
+                        {% if pagination.has_prev %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="{{ url_for(
+                                    'tickets.list_tickets',
+                                    page=pagination.prev_num,
+                                    search=search,
+                                    status=status,
+                                    priority=priority,
+                                    category=category,
+                                    assignee=assignee,
+                                    sort=sort
+                                ) }}"
+                            >
+                                Previous
+                            </a>
+
+                        </li>
+
+                        {% else %}
+
+                        <li class="page-item disabled">
+
+                            <span class="page-link">
+                                Previous
+                            </span>
+
+                        </li>
+
+                        {% endif %}
+
+
+                        <!-- PAGE NUMBERS -->
+
+                        {% for page_num in pagination.iter_pages(
+                            left_edge=1,
+                            left_current=2,
+                            right_current=2,
+                            right_edge=1
+                        ) %}
+
+                            {% if page_num %}
+
+                                {% if page_num == pagination.page %}
+
+                                <li class="page-item active">
+
+                                    <span class="page-link">
+                                        {{ page_num }}
+                                    </span>
+
+                                </li>
+
+                                {% else %}
+
+                                <li class="page-item">
+
+                                    <a
+                                        class="page-link"
+                                        href="{{ url_for(
+                                            'tickets.list_tickets',
+                                            page=page_num,
+                                            search=search,
+                                            status=status,
+                                            priority=priority,
+                                            category=category,
+                                            assignee=assignee,
+                                            sort=sort
+                                        ) }}"
+                                    >
+                                        {{ page_num }}
+                                    </a>
+
+                                </li>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <li class="page-item disabled">
+
+                                    <span class="page-link">
+                                        …
+                                    </span>
+
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+
+                        <!-- NEXT -->
+
+                        {% if pagination.has_next %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="{{ url_for(
+                                    'tickets.list_tickets',
+                                    page=pagination.next_num,
+                                    search=search,
+                                    status=status,
+                                    priority=priority,
+                                    category=category,
+                                    assignee=assignee,
+                                    sort=sort
+                                ) }}"
+                            >
+                                Next
+                            </a>
+
+                        </li>
+
+                        {% else %}
+
+                        <li class="page-item disabled">
+
+                            <span class="page-link">
+                                Next
+                            </span>
+
+                        </li>
+
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =====================================================
+             NO TICKETS
+        ====================================================== -->
+
+        {% else %}
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body text-center py-5">
+
+                <h5>
+                    No tickets found
+                </h5>
+
+                <p class="text-muted">
+                    Try changing your search or filters.
+                </p>
+
+                <a
+                    href="{{ url_for('tickets.list_tickets') }}"
+                    class="btn btn-outline-primary"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const selectAll =
+        document.getElementById("selectAll");
+
+    const checkboxes =
+        document.querySelectorAll(
+            ".ticket-checkbox"
+        );
+
+    const selectedCount =
+        document.getElementById(
+            "selectedCount"
+        );
+
+
+    /*
+     * Update selected ticket count
+     */
+
+    function updateSelectedCount() {
+
+        const selected =
+            document.querySelectorAll(
+                ".ticket-checkbox:checked"
+            ).length;
+
+        if (selectedCount) {
+
+            selectedCount.textContent =
+                selected + " selected";
+
+        }
+
+    }
+
+
+    /*
+     * Select / deselect all
+     */
+
+    if (selectAll) {
+
+        selectAll.addEventListener(
+            "change",
+            function () {
+
+                checkboxes.forEach(
+                    function (checkbox) {
+
+                        checkbox.checked =
+                            selectAll.checked;
+
+                    }
+                );
+
+                updateSelectedCount();
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Individual checkbox
+     */
+
+    checkboxes.forEach(
+        function (checkbox) {
+
+            checkbox.addEventListener(
+                "change",
+                function () {
+
+                    updateSelectedCount();
+
+                    if (selectAll) {
+
+                        const total =
+                            checkboxes.length;
+
+                        const selected =
+                            document.querySelectorAll(
+                                ".ticket-checkbox:checked"
+                            ).length;
+
+                        selectAll.checked =
+                            total > 0 &&
+                            selected === total;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    /*
+     * Initial count
+     */
+
+    updateSelectedCount();
+
+});
+
+
+/*
+ * Bulk reassignment confirmation
+ */
+
+function confirmBulkReassign() {
+
+    const selected =
+        document.querySelectorAll(
+            ".ticket-checkbox:checked"
+        ).length;
+
+    const agent =
+        document.getElementById(
+            "bulkAgent"
+        );
+
+
+    if (selected === 0) {
+
+        alert(
+            "Please select at least one ticket."
+        );
+
+        return false;
+
+    }
+
+
+    if (!agent || !agent.value) {
+
+        alert(
+            "Please select an agent to reassign the tickets to."
+        );
+
+        return false;
+
+    }
+
+
+    return confirm(
+        "Reassign " +
+        selected +
+        " selected ticket(s)?"
+    );
+
+}
+
+
+/*
+ * Bulk close confirmation
+ */
+
+function confirmBulkClose() {
+
+    const selected =
+        document.querySelectorAll(
+            ".ticket-checkbox:checked"
+        ).length;
+
+
+    if (selected === 0) {
+
+        alert(
+            "Please select at least one ticket."
+        );
+
+        return false;
+
+    }
+
+
+    return confirm(
+        "Close " +
+        selected +
+        " selected ticket(s)? " +
+        "Tickets that cannot be closed will be refused individually."
+    );
+
+}
+
+</script>
+
+{% endblock %}

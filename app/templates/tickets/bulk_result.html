@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Bulk Action Result - SupportDesk{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div><h2 class="mb-1">Bulk Action Result</h2><p class="text-muted mb-0">Results of the bulk ticket operation</p></div>
+        <a href="{{ url_for('tickets.list_tickets') }}" class="btn btn-primary">Back to Tickets</a>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="result-card success-card">
+                <div class="result-icon success-icon">✓</div>
+                <div><div class="result-label">Successful</div><div class="result-number">{{ success_count }}</div><div class="result-description">ticket{{ '' if success_count == 1 else 's' }} processed successfully</div></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="result-card refused-card">
+                <div class="result-icon refused-icon">!</div>
+                <div><div class="result-label">Refused</div><div class="result-number">{{ refused_count }}</div><div class="result-description">ticket{{ '' if refused_count == 1 else 's' }} could not be processed</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header py-3">
+            <strong>Ticket Results</strong>
+            <span class="text-muted ms-2">{{ results|length }} ticket{{ '' if results|length == 1 else 's' }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if results %}
+            <div class="table-responsive">
+                <table class="table result-table mb-0">
+                    <thead><tr><th>Ticket</th><th>Result</th><th>Message</th></tr></thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <!-- TICKET ID -->
+                            <td>
+                                {% if result.ticket is defined %}
+                                <a href="{{ url_for('tickets.ticket_detail', ticket_id=result.ticket) }}" class="ticket-link">#{{ result.ticket }}</a>
+                                {% elif result.ticket_id is defined %}
+                                <a href="{{ url_for('tickets.ticket_detail', ticket_id=result.ticket_id) }}" class="ticket-link">#{{ result.ticket_id }}</a>
+                                {% else %}<span class="text-muted">—</span>{% endif %}
+                            </td>
+
+                            <!-- RESULT -->
+                            <td>
+                                {% if result.success is defined and result.success %}
+                                <span class="result-badge success-badge">✓ Success</span>
+                                {% else %}
+                                <span class="result-badge refused-badge">✕ Refused</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- MESSAGE -->
+                            <td>
+                                {% if result.message is defined and result.message %}
+                                <span class="message-text">{{ result.message }}</span>
+                                {% elif result.reason is defined and result.reason %}
+                                <span class="message-text">{{ result.reason }}</span>
+                                {% elif result.error is defined and result.error %}
+                                <span class="message-text">{{ result.error }}</span>
+                                {% else %}<span class="text-muted">No additional message</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-result">
+                <div class="empty-icon">—</div>
+                <h5>No results available</h5>
+                <p class="text-muted">No tickets were included in the bulk operation.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="mt-4">
+        <a href="{{ url_for('tickets.list_tickets') }}" class="btn btn-outline-secondary">← Return to Ticket Queue</a>
+    </div>
+</div>
+
+<style>
+.result-card{display:flex;align-items:center;gap:18px;padding:22px;border-radius:14px;background:#fff;border:1px solid #e9ecef;box-shadow:0 3px 12px rgba(0,0,0,.045)}
+.success-card{border-left:4px solid #198754}.refused-card{border-left:4px solid #dc3545}
+.result-icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:23px;font-weight:700}
+.success-icon{background:#e8f7ef;color:#198754}.refused-icon{background:#fdebed;color:#dc3545}
+.result-label{color:#6c757d;font-size:12px;font-weight:600}
+.result-number{color:#202832;font-size:28px;font-weight:750;line-height:1.1}
+.result-description{color:#929aa1;font-size:11px;margin-top:4px}
+
+/* TABLE */
+.result-table thead th{background:#fafbfc;color:#727c84;border-bottom:1px solid #e9ecef;padding:13px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.result-table tbody td{padding:15px 18px;border-bottom:1px solid #f0f2f4;vertical-align:middle}
+.result-table tbody tr:last-child td{border-bottom:0}.result-table tbody tr:hover{background:#fafcff}
+
+/* TICKET LINK */
+.ticket-link{color:#0d6efd;font-weight:700;text-decoration:none}.ticket-link:hover{text-decoration:underline}
+
+/* RESULT BADGES */
+.result-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:6px;font-size:10px;font-weight:700}
+.success-badge{background:#dff5e8;color:#146c43}.refused-badge{background:#fde7e9;color:#b02a37}
+.message-text{color:#606970;font-size:12px}
+
+/* EMPTY */
+.empty-result{text-align:center;padding:55px 20px}
+.empty-icon{width:45px;height:45px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border-radius:50%;background:#f1f3f5;color:#868e96;font-size:20px}
+.empty-result h5{font-size:15px;font-weight:700}.empty-result p{font-size:13px}
+
+/* MOBILE */
+@media(max-width:768px){
+    .result-card{padding:17px}.result-number{font-size:24px}.result-table{min-width:650px}
+}
+</style>
+{% endblock %}
