@@ -177,7 +177,7 @@ It shows:
 
 The login page provides secure access to the SupportDesk application for agents and supervisors.
 
-![SupportDesk Login](docs/images/login.png)
+![SupportDesk Login](docs/images/Screenshot 2026-08-31 011856.png)
 
 ---
 
@@ -185,7 +185,7 @@ The login page provides secure access to the SupportDesk application for agents 
 
 The dashboard provides an overview of ticket status, agent workload, resolved tickets, and SLA breaches.
 
-![SupportDesk Dashboard](docs/images/dashboard.png)
+![SupportDesk Dashboard](docs/images/Screenshot 2026-08-31 011910.png)
 
 ---
 
@@ -193,7 +193,7 @@ The dashboard provides an overview of ticket status, agent workload, resolved ti
 
 The dashboard includes a resolution trend chart showing the number of tickets resolved over the last 8 weeks.
 
-![Ticket Resolution Chart](docs/images/dashboard-chart.png)
+![Ticket Resolution Chart](docs/images/Screenshot 2026-08-31 011927.png)
 
 ---
 
@@ -201,7 +201,7 @@ The dashboard includes a resolution trend chart showing the number of tickets re
 
 The ticket management page allows users to search, filter, sort, assign, reassign, close, and export tickets.
 
-![Ticket Management](docs/images/tickets.png)
+![Ticket Management](docs/images/Screenshot 2026-08-31 011946.png)
 
 ---
 
@@ -209,7 +209,7 @@ The ticket management page allows users to search, filter, sort, assign, reassig
 
 The Create Ticket page allows support staff to enter ticket details, requester information, priority, category, and assignment.
 
-![Create Ticket](docs/images/create-ticket.png)
+![Create Ticket](docs/images/Screenshot 2026-08-31 012001.png)
 
 ---
 
@@ -217,7 +217,7 @@ The Create Ticket page allows support staff to enter ticket details, requester i
 
 The SLA Alerts page shows tickets that are approaching or have exceeded their SLA response target. Agents can acknowledge alerts from this page.
 
-![SLA Alerts](docs/images/sla-alerts.png)
+![SLA Alerts](docs/images/Screenshot 2026-08-31 012025.png)
 
 # Project Structure
 
