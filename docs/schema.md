@@ -47,7 +47,7 @@ This is the main table of the application. It stores the ticket information, ass
 
 The ticket table has foreign keys to the users table for the primary assignee and the user who created the ticket. :contentReference[oaicite:1]{index=1}
 
-### 3. `replies`
+### 3. `replies`  
 
 This table stores all replies and internal notes made inside tickets.
 
