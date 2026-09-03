@@ -219,7 +219,7 @@ The SLA Alerts page shows tickets that are approaching or have exceeded their SL
 
 ![SLA Alerts](docs/images/alert.png)
 
-# Project Structure
+# Project Structure Used
 
 ```text
 support-ticketing/
