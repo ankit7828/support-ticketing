@@ -30,7 +30,7 @@ Flask-Migrate and Alembic are used with the Flask application to manage changes 
 
 ## What is the request path for one representative user action, end to end?
 
-For example, when an agent acknowledges an SLA alert:
+For example, when an agent acknowledges an SLA alert :
 
 1. The agent opens the Alerts page in the browser.
 2. The browser sends a request to the Flask alert route when the agent clicks **Acknowledge**.
