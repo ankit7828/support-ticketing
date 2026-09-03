@@ -10,7 +10,7 @@ I used AI during the development of this project to help with coding, debugging,
 
 ### What I got
 
-I got the basic Flask project structure with folders for the application, models, routes, templates and configuration.
+I got the basic Flask project structure with folders for the application, models, routes, templates and configuration.  
 
 ### What I corrected
 
