@@ -6,7 +6,7 @@ I divided the project into small parts instead of trying to build everything at 
 
 Next, I added the ticket lifecycle, replies, collaborators, search and filters. After that, I worked on bulk actions, CSV export, dashboard, ticket history, and SLA alerts.
 
-Finally, I worked on the UI, added demo data, fixed errors, and prepared the project for deployment.
+Finally, I worked on the UI, added demo data, fixed errors, and prepared the project for deployment.  
 
 ## What order did you build in, and why that order?
 
