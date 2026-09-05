@@ -19,6 +19,7 @@ https://github.com/ankit7828/support-ticketing
 | Supervisor | ankit@demo.com | Ankit@7828 |
 | Agent | shivam@demo.com | shivam@123 |
 | Agent | riya@demo.com | riya@123 |
+| Agent | raghav@demo.com | raghav@123 |
 
 ## Basic Workflow
 
