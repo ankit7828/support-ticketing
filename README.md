@@ -1,6 +1,6 @@
 # SupportDesk
 
-SupportDesk is a web-based support ticketing system built with Flask and PostgreSQL.
+SupportTicketing is a web-based support ticketing system built with Flask and PostgreSQL.
 
 It allows support teams to create, manage, assign, track and resolve customer support tickets. It also includes role-based access, ticket history, collaborators, bulk actions, dashboards and SLA alerts.
 
