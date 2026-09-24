@@ -229,8 +229,6 @@ support-ticketing/
 ├── app/
 │   ├── models/
 │   ├── routes/
-│   ├── services/
-│   ├── static/
 │   ├── templates/
 │   ├── extensions.py
 │   ├── config.py
@@ -244,8 +242,6 @@ support-ticketing/
 │   └── ai-prompts.md
 │
 ├── migrations/
-│
-├── tests/
 │
 ├── .env.example
 ├── .gitignore
