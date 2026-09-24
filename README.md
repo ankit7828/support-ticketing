@@ -1,4 +1,4 @@
-# SupportDesk
+# Support-Ticketing
 
 SupportTicketing is a web-based support ticketing system built with Flask and PostgreSQL.
 
